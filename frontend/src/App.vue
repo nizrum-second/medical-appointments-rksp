@@ -1,58 +1,31 @@
 <template>
-	<div
-		id="app"
-		class="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200">
-		<Navbar v-if="authStore.isAuthenticated" />
-		<main
-			:class="{
-				'mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8':
-					authStore.isAuthenticated,
-			}">
-			<router-view v-if="!loading" />
-			<LoadingSpinner v-else />
-		</main>
-	</div>
+  <component :is="layout">
+    <router-view />
+  </component>
 </template>
 
 <script setup>
-	import { ref, onMounted, watch } from "vue";
-	import { useAuthStore } from "./stores/auth";
-	import { useRouter } from "vue-router";
-	import Navbar from "./components/Navbar.vue";
-	import LoadingSpinner from "./components/LoadingSpinner.vue";
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import AuthLayout from '@/layouts/AuthLayout.vue'
+import PublicLayout from '@/layouts/PublicLayout.vue'
+import EmptyLayout from '@/layouts/EmptyLayout.vue'
 
-	const authStore = useAuthStore();
-	const router = useRouter();
-	const loading = ref(true);
+const route = useRoute()
 
-	const redirectToDashboard = () => {
-		if (authStore.isAuthenticated && authStore.user) {
-			const currentPath = router.currentRoute.value.path;
-
-			if (currentPath === "/" || currentPath === "/dashboard") {
-				if (authStore.userRole === "admin") {
-					router.push("/admin");
-				} else if (authStore.userRole === "doctor") {
-					router.push("/doctor-dashboard");
-				} else {
-					router.push("/dashboard");
-				}
-			}
-		}
-	};
-
-	onMounted(async () => {
-		if (authStore.isAuthenticated) {
-			await authStore.fetchUser();
-		}
-		loading.value = false;
-		redirectToDashboard();
-	});
-
-	watch(
-		() => authStore.user,
-		() => {
-			redirectToDashboard();
-		},
-	);
+const layout = computed(() => {
+  const layoutName = route.meta.layout || 'default'
+  
+  switch (layoutName) {
+    case 'auth':
+      return AuthLayout
+    case 'public':
+      return PublicLayout
+    case 'empty':
+      return EmptyLayout
+    default:
+      return DefaultLayout
+  }
+})
 </script>

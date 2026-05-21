@@ -1,25 +1,12 @@
-FROM node:18-alpine AS builder
+FROM node:18-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 COPY . .
 
-RUN npm run build
+EXPOSE 5173
 
-FROM nginx:alpine
-
-RUN apk add --no-cache gettext
-
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-COPY nginx.conf.template /etc/nginx/conf.d/nginx.conf.template
-COPY entrypoint.sh /entrypoint.sh
-
-RUN chmod +x /entrypoint.sh
-
-EXPOSE 80
-
-ENTRYPOINT ["/entrypoint.sh"]
+CMD ["npm", "run", "dev", "--", "--host"]
