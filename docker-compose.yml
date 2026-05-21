@@ -24,7 +24,6 @@ services:
 
     backend:
         build: ./backend
-        container_name: clinic_backend
         depends_on:
             db:
                 condition: service_healthy
@@ -33,26 +32,37 @@ services:
             SECRET_KEY: ${SECRET_KEY}
             ALGORITHM: ${ALGORITHM}
             ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
-            HOST: ${BACKEND_HOST}
-            PORT: ${BACKEND_PORT}
-            ENVIRONMENT: ${ENVIRONMENT:-development}
         ports:
-            - "${BACKEND_PORT}:${BACKEND_PORT}"
+            - "8000:8000"
         networks:
             - clinic_network
-        command: uvicorn app.main:app --host ${BACKEND_HOST} --port ${BACKEND_PORT} --reload
+        deploy:
+            mode: replicated
+            replicas: 1
+            restart_policy:
+                condition: on-failure
 
-    frontend:
-        build: ./frontend
-        container_name: clinic_frontend
+    nginx:
+        image: nginx:alpine
+        container_name: clinic_nginx
+        volumes:
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
         depends_on:
             - backend
-        ports:
-            - "80:80"
         networks:
             - clinic_network
-        environment:
-            - BACKEND_URL=${BACKEND_URL}
+
+    # frontend:
+    #     build: ./frontend
+    #     container_name: clinic_frontend
+    #     depends_on:
+    #         - backend
+    #     ports:
+    #         - "80:80"
+    #     networks:
+    #         - clinic_network
+    #     environment:
+    #         - BACKEND_URL=${BACKEND_URL}
 
 networks:
     clinic_network:
