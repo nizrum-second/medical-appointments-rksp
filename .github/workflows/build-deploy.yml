@@ -78,5 +78,5 @@ jobs:
       - name: Trigger Render deploy (latest image)
         run: |
           echo "Deploying image with tag latest (built from commit ${{ github.sha }})"
-          curl -X POST "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK_URL }}"
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
           echo "Deploy triggered successfully"
