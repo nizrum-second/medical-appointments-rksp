@@ -55,19 +55,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull and run migration container
-        run: |
-          IMAGE="${{ env.REGISTRY }}/${{ github.repository_owner }}/backend:${{ github.sha }}"
-          IMAGE_LC=$(echo "$IMAGE" | tr '[:upper:]' '[:lower:]')
-          docker pull $IMAGE_LC
-          docker run --rm \
-            -e DB_HOST="${{ secrets.STAGING_DB_HOST }}" \
-            -e DB_PORT="${{ secrets.STAGING_DB_PORT }}" \
-            -e DB_USER="${{ secrets.STAGING_DB_USER }}" \
-            -e DB_PASSWORD="${{ secrets.STAGING_DB_PASSWORD }}" \
-            -e DB_NAME="${{ secrets.STAGING_DB_NAME }}" \
-            -e JWT_SECRET_KEY="${{ secrets.STAGING_JWT_SECRET_KEY }}" \
-            -e DATABASE_URL="${{ secrets.STAGING_DATABASE_URL }}" \
-            $IMAGE_LC migrate
+        run: ls
 
   deploy-staging:
     name: Deploy to Render
